@@ -3,6 +3,7 @@ package notebook.view;
 import notebook.controller.UserController;
 import notebook.model.User;
 import notebook.util.Commands;
+import notebook.util.UserValidator;
 
 import java.util.Scanner;
 
@@ -18,6 +19,7 @@ public class UserView {
 
         while (true) {
             String command = prompt("Введите команду: ");
+            String userId;
             com = Commands.valueOf(command);
             if (com == Commands.EXIT) return;
             switch (com) {
@@ -26,17 +28,26 @@ public class UserView {
                     userController.saveUser(u);
                     break;
                 case READ:
-                    String id = prompt("Идентификатор пользователя: ");
+                    userId = prompt("Идентификатор пользователя: ");
                     try {
-                        User user = userController.readUser(Long.parseLong(id));
+                        User user = userController.readUser(Long.parseLong(userId));
                         System.out.println(user);
                         System.out.println();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                     break;
+                case LIST:
+                    System.out.println(userController.readAll());
+                    break;
+
+                case DELETE:
+                    userId = prompt("Enter user id: ");
+                    userController.deleteUser(userId);
+                    break;
+
                 case UPDATE:
-                    String userId = prompt("Enter user id: ");
+                    userId = prompt("Enter user id: ");
                     userController.updateUser(userId, createUser());
             }
         }
@@ -52,6 +63,10 @@ public class UserView {
         String firstName = prompt("Имя: ");
         String lastName = prompt("Фамилия: ");
         String phone = prompt("Номер телефона: ");
-        return new User(firstName, lastName, phone);
+
+        User user = new User(firstName, lastName, phone);
+        UserValidator validator = new UserValidator();
+        user = validator.validate(user);
+        return user;
     }
 }
